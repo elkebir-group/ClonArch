@@ -258,7 +258,7 @@ updateAllUThresholds = function(slider) {
         // document.getElementById("uThresholdSlider"+i).value = newThreshold*100;
     }
 
-    document.getElementById("uThresholdLabelAll").innerHTML = slider.value + "%";
+    document.getElementById("uThresholdLabelAll").innerHTML = Math.round(slider.value) + "%";
     document.getElementById("clones").innerHTML = cloneBoxHTML;
     document.getElementById("frequency").innerHTML = freqBoxHTML;
 
