@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Spatial Composition</title>
+
+    <!--<script type="text/javascript" src="input.json"></script>-->
+    <script type="text/javascript" src="pnas.json"></script>
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+    <script src="dist/marchingsquares-isolines.js"></script>
+    <script src="dist/dagre-d3.js"></script>
+    <link href="style.css" rel="stylesheet" type="text/css">
+
+</head>
+<body>
+<div id = "cloneBox" class = "clone"> 
+    
+    <div id = "tree" class  = "tree">
+        <svg id = "tree-svg"></svg>
+    </div>
+
+
+    <!-- <div id = "legend" class = "legend"> 
+            <h3> Legend </h3>
+            <div id ="symbols" class = "symbols">
+            </div>
+        </div> <br> -->
+    
+
+    <div id="clones">
+        <svg></svg>
+    </div>
+    <div class = "threshold">
+        <div class = "thresholdContainer" id = "uThresholdContainer">
+            <div class = "threshold-row">
+                <span class = "threshold-value-label" id = "uThresholdLabelAll">10%</span>
+                <span class = "mutationSliderLabel">all</span>
+                <input type="range" min="1" max="100" value="10" id="uThresholdSliderAll" oninput="updateAllUThresholds(this)">
+            </div>
+        </div>
+    </div>  
+    <div id = "contours">        
+    </div>
+
+</div>
+
+<div id = "freqBox" class = "frequency">
+    <div class = "sidebar"> 
+        <div id = "flegend" class = "legend"> 
+            <h3> Frequency Legend </h3><!--<svg></svg>-->
+        </div> <br>
+
+        <!-- <div class = "threshold">
+            <h3> Mutation Frequency Threshold </h3>
+            <div class = "thresholdContainer" id="fThresholdContainer"> 
+                <span class = "mutationSliderLabel" >Mutation 1</span>
+                <input type="range" min="1" max="100" value="50" id="fThresholdSlider" oninput="updateFThreshold(this)">
+                <span class = "threshold-value-label" id = "fThresholdLabel">0.00</span>
+            </div>
+
+            <div class = "thresholdContainer">
+                <p> Change frequency threshold for all mutations </p>
+                <div class = 'threshold-row'>
+                    <span class = "mutationSliderLabel" >all</span>
+                    <input type="range" min="1" max="100" value="10" id="fThresholdSliderAll" oninput="updateAllFThresholds(this)">
+                    <span class = "threshold-value-label" id = "fThresholdLabelAll">0.10</span>
+                </div>
+            </div>
+        </div> -->
+    </div>
+    <div id="frequency" class = "grid">
+        <h2>Frequency (Matrix F)</h2> <br>
+        <svg></svg>
+    </div>
+</div>
+<div class = "buttons">
+    <input class = "settings-button button" id = "settings-button" type = "submit" value = "Select Mutations" onclick="toggleSettings(this)"> 
+    <span><button class = "download-button button" id = "downloadTree">Download Tree</button> 
+    <button class = "download-button button" id = "downloadGrid">Download Grid</button> 
+    </span>
+</div>
+
+<div class = "settings" id = "settings">
+    <div class = "user-input"> 
+        <div id = "checkbox-mutations" class = "check-mutations">
+<!--             <select multiple id = "mutation-selection">
+            </select> -->
+            <div>
+                <p>Unselected Mutations</p>
+                <select id = "unselected-mutations" multiple>
+                </select>
+            </div>
+            <div class = "arrows">
+                <input type="button" id="btnLeft" value="&lt;&lt;" onclick = "unselectMutations()"/>
+                <input type="button" id="btnRight" value="&gt;&gt;" onclick = "selectMutations()"/>
+            </div>
+            <div>
+                <p>Selected Mutations</p>
+                <select id = "selected-mutations" multiple>
+                </select>
+            </div>
+        </div>
+
+
+    </div>
+    
+    <div class = "hide-masks" id = "hide-masks">
+        <input type="checkbox" id = "crop-checkbox" value="crop" onchange="hideMasks(this)" checked> Crop <br>
+        <input type="checkbox" id = "erode-checkbox" value="erode" onchange="hideMasks(this)"> Stroke & Erode <br>
+        <input type="checkbox" id ="outline-checkbox" value="outline" onchange="hideMasks(this)" checked> Outline <br>
+    </div>
+
+    <div id = "ftoggle" class = "ftoggle">
+        <div class = "toggle-label">
+            <span>Frequency Matrix</span>
+        </div>
+        <label class="switch">
+          <input type="checkbox" value = "show" onchange="toggleF(this)">
+          <span class="slider"></span>
+        </label> 
+    </div>
+
+</div>
+
+
+
+
+
+<!-- <div id = "debugging"> 
+    <div id = "debug-tree">
+    </div>
+    <div id = "debug-u">
+    </div>
+    <div id = "debug-f">
+    </div>
+</div> -->
+
+<canvas id="canvas"></canvas>
+
+<a href='' id="downloadLink" download = "tumor.svg"></a>
+
+</body>
+
+
+<!--<script type="text/javascript" src="myDrawLines.js"></script>-->
+<script type="text/javascript" src="helper.js"></script>
+<script type="text/javascript" src="tree.js"></script>
+<!-- <script type="text/javascript" src="contour.js"></script> -->
+<script>
+var cloneBoxHTML = '<svg></svg>';
+var freqBoxHTML = '<svg></svg>';
+
+document.getElementById("freqBox").style.display = "none"
+document.getElementById("settings").style.display = 'none'
+
+toggleSettings = function() {
+    var settings = document.getElementById("settings")
+    var button = document.getElementById("settings-button")
+    if(settings.style.display == "none") {
+        settings.style.display = "inline"
+        button.value = "Select Mutations"
+    } else {
+        settings.style.display = "none"
+        button.value = "Select Mutations"
+    }
+}
+
+openMore = function(ex) {
+    debugger
+}
+
+hideMasks = function(checkbox) {
+    // if(checkbox.value == "fill") {
+    //     var fillMask = document.getElementsByClassName("fill-mask")
+    //     if(checkbox.checked) {
+    //         for(var i = 0; i < fillMask.length; i++) {
+    //             fillMask[i].style.display = "none"
+    //         }
+    //     } else {
+    //         for(var i = 0; i < fillMask.length; i++) {
+    //             fillMask[i].style.display = "inline-block"
+    //         }
+    //     }
+
+    // }
+    if (checkbox.value == "erode") {
+        if(checkbox.checked) {
+            erode = true
+        } else {
+            erode = false
+        }
+        document.getElementById("clones").innerHTML = cloneBoxHTML;
+        document.getElementById("frequency").innerHTML = freqBoxHTML;
+        visualize(currMatrixU, currMatrixF, erode)
+    } else if (checkbox.value == "outline") {
+        var outlines = document.getElementsByClassName("outline")
+        if(checkbox.checked) {
+            for(var i = 0; i < outlines.length; i++) {
+                outlines[i].style.opacity = 1.0
+            }
+        } else {
+            for(var i = 0; i < outlines.length; i++) {
+                outlines[i].style.opacity = 0.0
+            }
+        }
+    } else if (checkbox.value == "crop") {
+        var clipPath = document.getElementById("rect-clip")
+        if(checkbox.checked) {
+            clipPath.style.display = 'inline'
+        } else {
+            clipPath.style.display = 'none'
+        }
+    }
+}
+
+toggleF = function() {
+    var freqBox = document.getElementById("freqBox")
+    var cloneBox = document.getElementById("cloneBox")
+
+    if(freqBox.style.display == "none") { 
+        freqBox.style.display = "inline"
+        cloneBox.style.display = "none"
+
+    } else {
+        freqBox.style.display = "none"
+        cloneBox.style.display = "inline"
+    }
+}
+
+updateUThreshold = function(slider) {
+    var newThreshold = (slider.value)/100
+
+    var index = slider.id
+    index = index.replace(/\D/g,'');
+    uThreshold[index] = newThreshold
+    document.getElementById("uThresholdLabel"+index).innerHTML = Math.round(slider.value)+"%";
+    
+    document.getElementById("clones").innerHTML = cloneBoxHTML;
+    document.getElementById("frequency").innerHTML = freqBoxHTML;
+    //drawCanvas();
+
+    visualize(currMatrixU, currMatrixF)
+
+    // if(globalContourIdx == index) {
+    //     drawContours(currMatrixU, index)
+    // }
+
+    thresholdRefresh()
+}
+
+updateAllUThresholds = function(slider) {
+    var newThreshold = (slider.value)/100
+
+    for(var i = 0; i < numMutations; i++) {
+        uThreshold[i] = newThreshold
+
+        // document.getElementById("uThresholdLabel"+i).innerHTML = newThreshold;
+        // document.getElementById("uThresholdSlider"+i).value = newThreshold*100;
+    }
+
+    document.getElementById("uThresholdLabelAll").innerHTML = slider.value + "%";
+    document.getElementById("clones").innerHTML = cloneBoxHTML;
+    document.getElementById("frequency").innerHTML = freqBoxHTML;
+
+    visualize(currMatrixU, currMatrixF)
+    // if(globalContourIdx != -1) {
+    //    drawContours(currMatrixU, globalContourIdx) 
+    // }
+
+    thresholdRefresh()
+}
+
+updateFThreshold = function(slider) {
+    var newThreshold = (slider.value)/100;
+    var index = slider.id
+    index = parseInt(index[index.length - 1])
+    fThreshold[index] = newThreshold
+
+
+    document.getElementById("fThresholdLabel"+index).innerHTML = newThreshold;
+    
+    document.getElementById("clones").innerHTML = cloneBoxHTML;
+    document.getElementById("frequency").innerHTML = freqBoxHTML;
+
+    visualize(currMatrixU, currMatrixF)
+    thresholdRefresh()
+}
+
+updateAllFThresholds = function(slider) {
+    var newThreshold = (slider.value)/100
+
+    for(var i = 0; i < numMutations; i++) {
+        fThreshold[i] = newThreshold
+
+        document.getElementById("fThresholdLabel"+i).innerHTML = newThreshold;
+        document.getElementById("fThresholdSlider"+i).value = newThreshold*100;
+    }
+
+    document.getElementById("fThresholdLabelAll").innerHTML = newThreshold;
+    document.getElementById("clones").innerHTML = cloneBoxHTML;
+    document.getElementById("frequency").innerHTML = freqBoxHTML;
+
+    visualize(currMatrixU, currMatrixF)
+    thresholdRefresh()
+}
+
+pickMutations = function() {
+    var checkboxes = document.getElementById("selected-mutations");
+    var unselected_checkboxes = document.getElementById("unselected-mutations")
+    selectedMutations = [];
+    htmlSelectedMutations = []
+    for(var idx = 0; idx < checkboxes.length; idx++) {
+        var mut = parseInt(checkboxes[idx].value)
+        if(!(selectedMutations.includes(mut))) {
+            selectedMutations.push(mut);
+            
+        }
+        htmlSelectedMutations.push(checkboxes[idx].innerHTML)
+    }
+    
+    //refresh
+    document.getElementById("clones").innerHTML = cloneBoxHTML;
+    document.getElementById("frequency").innerHTML = freqBoxHTML;
+
+    checkboxes = sortDOM("selected-mutations",true)
+    unselected_checkboxes = sortDOM("unselected-mutations",true)
+
+    getSubsetMutations(selectedMutations)
+}
+
+unselectMutations = function() {
+    var checkboxes = document.getElementById("selected-mutations")
+    var unselectedMutations = [];
+    var toRemove = []
+    for(var idx = 0; idx < checkboxes.length; idx++) {
+        if (checkboxes[idx].selected) {
+            unselectedMutations.push(parseInt(checkboxes[idx].value))
+            toRemove.push(checkboxes[idx])
+        }
+    }
+    var otherbox = document.getElementById("unselected-mutations")
+    for(var idx = 0; idx < toRemove.length; idx++) {
+        otherbox.append(toRemove[idx])
+    }
+}
+
+selectMutations = function() {
+    var checkboxes = document.getElementById("unselected-mutations")
+    var selectedMutations = [];
+    var toRemove = []
+    for(var idx = 0; idx < checkboxes.length; idx++) {
+        if (checkboxes[idx].selected) {
+            selectedMutations.push(parseInt(checkboxes[idx].value))
+            toRemove.push(checkboxes[idx])
+        }
+    }
+    var otherbox = document.getElementById("selected-mutations")
+
+    for(var idx = 0; idx < toRemove.length; idx++) {
+        otherbox.append(toRemove[idx])
+    }
+}
+
+
+selectAllMutations = function(selectAll){
+    var checkboxes = document.getElementsByName("mutation");
+    for(var index = 0; index < checkboxes.length; index++) {
+        checkboxes[index].selected = true;
+    }
+}
+
+
+thresholdRefresh = function() {
+    // check checkbox toggles 
+    //erode must be checked first to apply the rest of the attrs
+    hideMasks(document.getElementById("erode-checkbox"))
+
+    hideMasks(document.getElementById("outline-checkbox"))
+    hideMasks(document.getElementById("crop-checkbox"))
+    // hideMasks(document.getElementById("fill-checkbox"))
+}
+
+window.onload = function WindowLoad(event) {
+    addTreeInteractivity() 
+    var gridDownload = document.getElementById('downloadGrid')
+    var treeDownload = document.getElementById('downloadTree')
+
+    var svg = document.getElementById('matrixUgrid')
+    var canvas = document.querySelector('canvas');
+
+    gridDownload.addEventListener('click', triggerDownload);
+    treeDownload.addEventListener('click', triggerDownload);
+}
+
+function triggerDownload(e) {
+        var svg = ""
+        var filename = "tumor.svg"
+        if(e.currentTarget.id == "downloadGrid") {
+            filename="grid.svg"
+            svg = document.getElementById("matrixUgrid");
+        } else {
+            filename="tree.svg"
+            svg = document.getElementById("tree-svg");
+            svg = svg.cloneNode([true]) 
+            var nodes = svg.getElementsByClassName("node");
+            for(var i in nodes) {
+                nodes[i].style="stroke: #999; fill: #fff; stroke-width: 1.5px"
+            }
+            var edges = svg.getElementsByClassName("edgePath");
+            for(var i = 0; i < edges.length; i++) {
+                var path = edges[i].getElementsByTagName("path")
+                for(var j = 0; j < path.length; j++) 
+                    path[j].style = "fill: none;stroke:#333; stroke-width:1.5px"
+            }
+        }
+
+        //get svg source.
+        var serializer = new XMLSerializer();
+        var source = serializer.serializeToString(svg);
+
+        //add name spaces.
+        if(!source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)){
+            source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+        }
+        if(!source.match(/^<svg[^>]+"http\:\/\/www\.w3\.org\/1999\/xlink"/)){
+            source = source.replace(/^<svg/, '<svg xmlns:xlink="http://www.w3.org/1999/xlink"');
+        }
+
+        //add xml declaration
+        source = '<?xml version="1.0" standalone="no"?>\r\n' + source;
+
+        //convert svg source to URI data scheme.
+        var url = "data:image/svg+xml;charset=utf-8,"+encodeURIComponent(source);
+
+        //set url value to a element's href attribute.
+        document.getElementById("downloadLink").download = filename
+        document.getElementById("downloadLink").href = url;
+        document.getElementById("downloadLink").click();
+    }
+
+// function triggerDownload (imgURI) {
+//   var evt = new MouseEvent('click', {
+//     view: window,
+//     bubbles: false,
+//     cancelable: true
+//   });
+
+//   var a = document.createElement('a');
+//   a.setAttribute('download', 'neat.png');
+//   a.setAttribute('href', imgURI);
+//   a.setAttribute('target', '_blank');
+
+//   a.dispatchEvent(evt);
+// }
+
+
+</script>
+<script type="text/javascript" src="main.js"></script>
+</html>
