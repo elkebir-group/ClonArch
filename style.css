@@ -1,4 +1,6 @@
-
+html {
+  margin: 30px 10px;
+}
 /* general styling
  _____________________________________________ */
 
@@ -13,11 +15,17 @@
 }
 
 .button, input[type="submit"] {
-  margin: 20px 20px;
+  margin: 10px 10px;
   padding: 5px 10px;
   background-color: #ddd;
   cursor: pointer;
   outline: none;
+}
+
+
+.buttons {
+  width: 50%;
+  margin: 20px 10px 0px 20px
 }
 
 .settings div {
@@ -41,9 +49,9 @@ div {
   margin-top: 20px;
 }
 
-#clones {
+.clones {
   position: relative;
-  width: 60%;
+  width: 55%;
   height: 90%;
 }
 
@@ -102,7 +110,7 @@ div {
 }
 
 .threshold {
-    width: 30%;
+    width: 40%;
     margin: 20px 10px 0px 20px;
 }
 
@@ -147,7 +155,7 @@ svg, svg* {
 
 #tree {
   position: relative;
-  width: 30%;
+  width: 45%;
   height: 90%;
 
 }
@@ -159,6 +167,11 @@ svg, svg* {
   top: 0;
 }
 
+#tree-dropdown {
+  font-size:15px;
+  width:200px;
+  margin: 0 20px;
+}
 
 text {
     font-weight: 300;

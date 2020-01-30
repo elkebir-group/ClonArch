@@ -236,12 +236,9 @@ function getSubsetMutations(selectedMutations) {
      * getting order now allows idx to assign indicies
      * according to their order 
      */
-
     
     var root = findNewRoot(phyloTree)
     order = bfsOrder(phyloTree, root)
-
-
 
     /* index to color idx
      * basically, converts the BFS order to the actual mutation # 
@@ -357,9 +354,9 @@ function visualize(matrixU, matrixF, erode) {
         /* empty svg initialization */
         //weird values to fit with border
         var xRange = d3.range(0, n+3);   //rows
-        var yRange = d3.range(-1, m+4);   //cols
+        var yRange = d3.range(0, m+3);   //cols
 
-        var width = 18*n;
+        var width = 100*n;
         var height = width * (yRange.length / xRange.length);
 
         
@@ -403,9 +400,9 @@ function visualize(matrixU, matrixF, erode) {
                 .attr("id", "rect-clip")
                 .append("rect")
                 .attr("x", width/(n+2))
-                .attr("y", height/(m+1))
-                .attr("width", width-(2*(width/(n-1)))-15)
-                .attr("height", height-(2*(height/(m+1))))
+                .attr("y", height/(m+2))
+                .attr("width", width-(2*(width/(n+2))))
+                .attr("height", height-(2*(height/(m+2))))
 
             if(erode) {
                 for(var index = 0; index < filters.length; index++) {
@@ -666,10 +663,6 @@ function visualize(matrixU, matrixF, erode) {
                                 //first click
                                 var g = this.cloneNode(true)
                                 //can only have one clicked at once
-                                // while (document.getElementById("remove-cloud-click")) {
-                                //     var element = document.getElementById("remove-cloud-click")
-                                //     element.parentNode.removeChild(element);
-                                // }
                                 g.class = "temp-cloud"
                                 g.id = "remove-cloud-click"
                                 this.parentElement.appendChild(g);
@@ -878,21 +871,6 @@ function visualize(matrixU, matrixF, erode) {
                         .style("opacity", 0)
                 });
 
-
-            //i=2 to prevent truncated grid points (vertical-wise)
-            // for(var i = ysection; i < height-3; i+=ysection) {
-            //     gridPoints.selectAll("circle.vertical")
-            //         .data(yaxiscoorddata)
-            //         .enter().append("svg:circle")
-            //         .attr("cx", function(d){return d;})
-            //         .attr("cy", i)
-            //         .attr("r", 1.75)
-            //         .on('mouseover', function (d) {
-            //                 debugger
-            //             })
-            //     //.style("stroke", "rgb(6,120,155)")
-            //     //.style("stroke-width", 8);  
-            // }
         } // end of draw matrix function
     } // end of draw canvas
 }   //end of visualize
@@ -923,30 +901,6 @@ if (mutLabels.length == 0) {
 
 //if we have labels 
 } else {
-    // mutation legend
-    // for (var i = 0; i < order.length; i++) {
-    //     var label = ""
-    //     if(order[i] != "") {
-    //         for(var j in order[i]) {
-    //             try {
-    //                 if(!(order[i-1]).includes(order[i][j])) {
-    //                     label += idxToLabel[order[i][j]] += ", " 
-    //                 }    
-    //             } catch(e) {
-    //                 console.log("Error creating frequency color legend. ")
-    //             }
-                
-    //         }
-    //         label = label.substr(0, label.length-2)
-    //     } else {
-    //         label = "Unselected ancestral mutations"
-    //     }
-        
-    //     if(label.length > 30) {
-    //         label = label.substr(0,30)
-    //     }
-    // }
-
     //selection boxes 
     for (var cluster = 0; cluster < mutLabels.length; cluster++) {
         var currIdx = labelToIdx[mutLabels[cluster]]

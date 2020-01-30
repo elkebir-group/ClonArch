@@ -8,7 +8,8 @@ var phyloTree = phylogeny[selectedTreeIdx];
 
 var test = test;
 
-var uThreshold = [];
+var uThreshold = data.u_thresholds;
+var fThreshold = data.f_thresholds;
 
 /* Size of grid */
 var n = data.cols;  // columns
@@ -39,14 +40,10 @@ for(var label in labelToIdx) {
     idxToLabel[newKey] = newVal
 }
 
-// Color Brewer: Qualitative 1 + 2 
-// first row + second row
-var colorRanges =                                                           //extra'#8dd3c7'
-    ['#a6cee3','#1f78b4','#b2df8a','#33a02c','#fb9a99','#e31a1c','#fdbf6f','#8dd3c7','#ff7f00','#cab2d6','#6a3d9a','#ffff99','#b15928', 
-     '#8dd3c7','#ffffb3','#bebada','#fb8072','#80b1d3','#fdb462','#b3de69','#fccde5','#d9d9d9','#bc80bd','#ccebc5','#ffed6f'] 
-    // [d3.rgb(141,211,199),d3.rgb(255,255,179),d3.rgb(190,186,218),d3.rgb(251,128,114),d3.rgb(128,177,211),d3.rgb(253,180,98),d3.rgb(179,222,105),d3.rgb(252,205,229),d3.rgb(217,217,217),d3.rgb(188,128,189),d3.rgb(227,26,28),d3.rgb(255,237,111),
-    //  d3.rgb(166,206,227),d3.rgb(31,120,180),d3.rgb(178,223,138),d3.rgb(51,160,44),d3.rgb(251,154,153),d3.rgb(204,235,197),d3.rgb(253,191,111),d3.rgb(255,127,0),d3.rgb(202,178,214),d3.rgb(106,61,154),d3.rgb(255,255,153),d3.rgb(177,89,40)]
-
+//Color Brewer: Qualitative 1 + 2
+var colorRanges = 
+    ['#a6cee3', '#e31a1c', '#1f78b4', '#b15928', '#b2df8a', '#33a02c', '#fb9a99', '#ffff99']
+//['#1a6699','#7cbde9','#d3e9f8','#60a428', '#93d75b', '#e4f5d6', '#930806','#f73e3b','#fdcfce', '#955b04','#faa21e','#feeacd','#ddcde5','#9768b1','#623d76','#cccc00','#ffff00','#ffffb3', '#2a6f62','#8dd3c7','#c8eae4']
 /**
     colorIdx assigns each mutation (mutation introduction) to color. this color is associated
     with its corresponding mutation throughout the application
@@ -68,7 +65,7 @@ for(var i in arr) {
     i=parseInt(i)+1
     colorIdx[i]=colorRanges[i-1]
 }
-colorIdx[0]=colorRanges[0]
+//colorIdx[""]=colorRanges[0]
 
 var availableColors = colorRanges;
 // HEX unicode symbols to represent mutations in clones
@@ -251,8 +248,6 @@ function getSubsetMutations(selectedMutations) {
         curr_node=parseInt(order[o_index][order[o_index].length-1])
         indexToColorIdx[o_index]=curr_node
     } 
-    //default for when no nodes are selected except the root
-    indexToColorIdx[0]=0
 
     var newInfo = getNewU(newMuts, matrixU, idx, order)
     var newU = newInfo[0]
@@ -309,7 +304,7 @@ function getSubsetMutations(selectedMutations) {
     
     //reset thresholds to 0.1 
     for(var i = 0; i < numMutations; i++) {
-        uThreshold[i] = data.default_threshold;
+        uThreshold[i] = 0.1
     }
     //drawThresholds(treeLabels); 
 

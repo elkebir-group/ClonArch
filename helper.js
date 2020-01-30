@@ -375,7 +375,11 @@ function prettyPrint(matrix) {
  */
 
 // 1. Determine the "order"//hierarchy of all nodes (from tree, then from index)
-
+/**
+  assumption:
+  last node in ORDER (bfsorder; all the mutations in the clone)
+  is the CURRENT node 
+**/
 // returns ordering for overlaps 
 // parent should be largest, and then children, and for siblings, whichever comes first 
 
