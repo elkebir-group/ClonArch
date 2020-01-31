@@ -1,8 +1,27 @@
 html {
   margin: 30px 10px;
 }
+
 /* general styling
  _____________________________________________ */
+
+.video {
+  text-align: center;
+  width: 100%;
+}
+
+.menu a {
+    padding: 0px 20px;
+}
+
+.menu {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.title {
+    text-align: center;
+}
 
 #downloadLink,
 #canvas {
