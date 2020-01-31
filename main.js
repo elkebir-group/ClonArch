@@ -271,7 +271,7 @@ function getSubsetMutations(selectedMutations) {
 
 
     var legendlabels = (Object.keys(labeledMuts).length == 0) ?  newMuts : labeledMuts
-    let flegend = document.getElementById("flegend");
+    //let flegend = document.getElementById("flegend");
     //flegend.innerHTML = "<h3> Legend </h3>"
 
     if(Object.keys(labeledMuts).length == 0) {
